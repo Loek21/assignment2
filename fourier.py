@@ -17,7 +17,7 @@ def prob_sum(prob):
         result.append(val / total)
     return result
 
-N = 1000
+N = 2100
 T = 1000
 t = 0.0
 
@@ -25,7 +25,7 @@ beta = 1.5
 gamma = 0.5
 mu = 0.02
 nu = 0.02
-alpha = 0.05
+alpha = 0.002
 
 I = 100
 S = N - I
@@ -33,11 +33,17 @@ R = 0
 
 data = []
 data.append((t, S, I, R))
+extinctions = 0
 
+switch = 0
 while t < T:
-  if I == 0:
+  if I == 0 and switch == 0:
     print("Extinction")
-    break
+    extinctions += 1
+    switch = 1
+
+  if I > 0:
+      switch = 0
     
   event1 = beta * S * I / N
   event2 = gamma * I
@@ -89,7 +95,7 @@ tot_list = list(map(lambda x: data[x][1] + data[x][2] + data[x][3], np.arange(0,
 raw_data = i_list
 
 N_order = 3
-Wn = 0.0003
+Wn = 0.003
 B, A = signal.butter(N_order, Wn, output='ba')
 smooth_data = signal.filtfilt(B,A, raw_data)
 
@@ -97,8 +103,8 @@ smooth_data = signal.filtfilt(B,A, raw_data)
   
 # print(t_list)
 # print(len(data))
-#plt.plot(t_list, smooth_data)
-plt.plot(t_list, i_list)
+plt.plot(t_list, smooth_data)
+#plt.plot(t_list, i_list)
 plt.plot(t_list, r_list)
 plt.plot(t_list, s_list)
 plt.plot(t_list, tot_list)
@@ -119,13 +125,13 @@ print(covariance_si)
 def calc_ode3(b_val, g_val, death_rate, birth_rate):
     
     # initial conditions for the problem
-    x0 = [900, 100, 0]
+    x0 = [N-100, 100, 0]
     
     # up to 50 days after incident
     t = np.linspace(0, 1000, 1000)
     
     # pop size
-    N = 1000
+    #N = 1000
     
     def SIRmodel3(x,t):
         s = x[0]    # susceptible
@@ -169,31 +175,22 @@ plt.plot(time_list, total_pop, '--r', label='T')
 plt.legend(loc='upper right')
 plt.show()
 
+print(extinctions)
+
+cutoff = 200
+
 # add fourier analysis
-intervals = 1000
+intervals = cutoff
 t = np.linspace(0, 1, intervals)
-fourier = fft(data_ode[1])
+fourier = fft(data_ode[1][:cutoff])
 fourier_abs = (fourier.real**2 + fourier.imag**2)**(1/2)
-fourier2 = fft(smooth_data)
+fourier2 = fft(smooth_data[:cutoff])
 fourier_abs2 = (fourier2.real**2 + fourier2.imag**2)**(1/2)
 
-# fig3, ax3 = plt.subplots()
-# ax3.bar(t[1:intervals // 2], np.abs(fourier)[1:intervals // 2]*(1/intervals), width=0.005)
-# ax3.set_xlim(0, 0.6)
-# ax3.set_ylabel('Amplitude')
-# ax3.set_xlabel('Frequency (Hz)')
-
-#fig, ax = plt.subplot
 plt.subplot(1,2,1)
-plt.bar(t[1:intervals // 2], np.abs(fourier)[1:intervals // 2]*(1/intervals), width=0.01)
+plt.bar(t[1:intervals // 2], np.abs(fourier)[1:intervals // 2]*(1/intervals), width=0.003)
 
 plt.subplot(1,2,2)
-plt.bar(t[1:intervals // 2], np.abs(fourier2)[1:intervals // 2]*(1/intervals), width=0.01)
+plt.bar(t[1:intervals // 2], np.abs(fourier2)[1:intervals // 2]*(1/intervals), width=0.003)
 plt.show()
 
-# sine_data = []
-# for x in range(0,100):
-#     sine_data.append(7*math.sin(x*0.3))
-
-# plt.plot(np.linspace(0, 10, 100), sine_data)
-# plt.show()
