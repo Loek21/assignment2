@@ -6,6 +6,8 @@ import bisect
 from scipy.integrate import odeint
 from scipy.signal import lfilter
 from scipy.fft import fft
+import seaborn as sns
+import pandas as pd
 
 N = 1000
 T = 1000
@@ -128,10 +130,17 @@ for i in range(20000):
 s_mean = np.mean(S_list)
 i_mean = np.mean(I_list)
 
+plt.show()
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
-ax1.errorbar(av_t_list, av_S_list, std_S_list, label="Susceptible")
-ax1.errorbar(av_t_list, av_I_list, std_I_list, label="Infected")
-ax1.errorbar(av_t_list, av_R_list, std_R_list, label="Recovered")
+markers, caps, bars = ax1.errorbar(av_t_list, av_S_list, std_S_list, color="blue", linewidth=0.4, ecolor="orange", label="Susceptible")
+[bar.set_alpha(0.8) for bar in bars]
+markers, caps, bars = ax1.errorbar(av_t_list, av_I_list, std_I_list, color="red", linewidth=0.4, ecolor="orange", label="Infected")
+[bar.set_alpha(0.8) for bar in bars]
+markers, caps, bars = ax1.errorbar(av_t_list, av_R_list, std_R_list, color="green", linewidth=0.4, ecolor="orange", label="Recovered")
+[bar.set_alpha(0.8) for bar in bars]
 ax1.legend(loc="best")
+ax1.set_xlabel("Time")
+ax1.set_ylabel("Population")
+ax1.set_title("Variability in Stochastic models")
 plt.show()
