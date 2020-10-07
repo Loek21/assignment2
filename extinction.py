@@ -17,7 +17,7 @@ def prob_sum(prob):
         result.append(val / total)
     return result
 
-N = 2100
+N = 2750
 T = 1000
 t = 0.0
 
@@ -27,8 +27,8 @@ mu = 0.02
 nu = 0.02
 alpha = 0.002
 
-I = 64
-R = 1316
+I = 55
+R = 1726
 S = N - I - R
 
 data = []
@@ -106,8 +106,8 @@ smooth_data = signal.filtfilt(B,A, raw_data)
   
 # print(t_list)
 # print(len(data))
-plt.plot(t_list, smooth_data)
-#plt.plot(t_list, i_list)
+#plt.plot(t_list, smooth_data)
+plt.plot(t_list, i_list)
 plt.plot(t_list, r_list)
 plt.plot(t_list, s_list)
 plt.plot(t_list, tot_list)
@@ -176,25 +176,7 @@ plt.plot(time_list, data_ode[2], linestyle='dashed', color='orange', label='R')
 plt.plot(time_list, data_ode[0], '--g', label='S')
 plt.plot(time_list, total_pop, '--r', label='T')
 plt.legend(loc='upper right')
-plt.show()
+#plt.show()
 
 print(f'Extinctions: {extinctions}')
 print(f'FPT: {first_passage}')
-
-cutoff = 200
-
-# add fourier analysis
-intervals = cutoff
-t = np.linspace(0, 1, intervals)
-fourier = fft(data_ode[1][:cutoff])
-fourier_abs = (fourier.real**2 + fourier.imag**2)**(1/2)
-fourier2 = fft(smooth_data[:cutoff])
-fourier_abs2 = (fourier2.real**2 + fourier2.imag**2)**(1/2)
-
-plt.subplot(1,2,1)
-plt.bar(t[1:intervals // 2], np.abs(fourier)[1:intervals // 2]*(1/intervals), width=0.003)
-
-plt.subplot(1,2,2)
-plt.bar(t[1:intervals // 2], np.abs(fourier2)[1:intervals // 2]*(1/intervals), width=0.003)
-plt.show()
-
