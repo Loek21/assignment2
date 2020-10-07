@@ -1,0 +1,125 @@
+import math
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import bisect
+from scipy.integrate import odeint
+from scipy.signal import lfilter
+from scipy.fft import fft
+import seaborn as sns
+import pandas as pd
+
+N = 1000
+T = 1000
+t = 0.0
+beta = 1.5
+gamma = 0.5
+mu = 0.02
+nu = 0.02
+alpha = 0.1
+I = 100
+S = N - I
+R = 0
+
+def prob_sum(prob):
+    """Calculates the sum of the probabilities"""
+    total = sum(prob)
+    result = []
+    val = 0
+    for p in prob:
+        val += p
+        result.append(val / total)
+    return result
+
+def disc_event(t, S, I, R, pops):
+    data = []
+    data.append((t, S, I, R))
+
+    while t < T:
+        if I == 0:
+            print("Extinction")
+            break
+
+        event1 = beta * S * I / pops
+        event2 = gamma * I
+        event3 = mu * pops
+        event4 = nu * S
+        event5 = nu * I
+        event6 = nu * R
+        # event7 = alpha * math.sqrt(N)
+        E_tot = event1 + event2 + event3 + event4 + event5 + event6
+
+        dt = -math.log(1-random.uniform(0.0, 1.0)) / E_tot
+        t += dt
+
+        event_list = prob_sum([event1, event2, event3, event4, event5, event6])
+
+        selected_event = bisect.bisect(event_list, random.uniform(0.0, 1.0))
+
+        if selected_event == 0:
+            S -= 1
+            I += 1
+        elif selected_event == 1:
+            R += 1
+            I -= 1
+
+        elif selected_event == 2:
+            S += 1
+
+        elif selected_event == 3:
+            S -= 1
+
+        elif selected_event == 4:
+            I -= 1
+
+        else:
+            R -= 1
+
+        data.append((t, S, I, R))
+
+    t_list = list(map(lambda x: data[x][0], np.arange(0, len(data), 1)))
+    S_list = list(map(lambda x: data[x][1], np.arange(0, len(data), 1)))
+    I_list = list(map(lambda x: data[x][2], np.arange(0, len(data), 1)))
+    R_list = list(map(lambda x: data[x][3], np.arange(0, len(data), 1)))
+    return t_list, S_list, I_list, R_list
+
+# Phase plots for transients
+covariance = {}
+pop_sizes = [1000,5000,10000,20000,50000,100000]
+for j in range(5):
+    for i in pop_sizes:
+        t_list, S_list, I_list, R_list = disc_event(t, S, I, R, i)
+        s_mean = np.mean(S_list[:20000])
+        i_mean = np.mean(I_list[:20000])
+
+        covariance_si = 0
+
+        for i in range(len(S_list)):
+            covariance_si += (S_list[i] - s_mean) * (I_list[i] - i_mean)
+
+        covariance_si /= len(S_list)
+        if j in covariance.keys():
+            covariance[j].append(covariance_si)
+        else:
+            covariance[j] = [covariance_si]
+
+av_Covar = []
+std_Covar = []
+for j in range(len(pop_sizes)):
+    temp = []
+    for i in range(5):
+        temp.append(covariance[i][j])
+    av_Covar.append(np.mean(temp))
+    std_Covar.append(np.std(temp))
+
+
+
+plt.show()
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+ax1.errorbar(pop_sizes, av_Covar, std_Covar, capsize=5)
+ax1.legend(loc="best")
+ax1.set_xlabel("Population Size")
+ax1.set_ylabel("Covariance")
+ax1.set_title("Covariance")
+plt.show()
