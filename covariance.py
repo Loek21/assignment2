@@ -6,13 +6,13 @@ import bisect
 from scipy.integrate import odeint
 from scipy.signal import lfilter
 from scipy.fft import fft
-import seaborn as sns
-import pandas as pd
+#import seaborn as sns
+#import pandas as pd
 
 N = 1000
-T = 1000
+T = 500
 t = 0.0
-beta = 1.5
+beta = 2.5
 gamma = 0.5
 mu = 0.02
 nu = 0.02
@@ -85,7 +85,7 @@ def disc_event(t, S, I, R, pops):
 
 # Phase plots for transients
 covariance = {}
-pop_sizes = [1000,5000,10000,20000,50000,100000]
+pop_sizes = [1000,2000,3000,4000,5000,6000]
 for j in range(5):
     for i in pop_sizes:
         t_list, S_list, I_list, R_list = disc_event(t, S, I, R, i)
